@@ -1,7 +1,8 @@
 import torch
 import torchvision.models as models
 import torch.nn as nn
-
+from myexception import RetrievalException
+from myerror import RetrievalErrorCode
 # --- setup ---
 # candidate images folder path
 # 정상 이미지 path
@@ -44,19 +45,22 @@ wrong_model_name = "chanyoungNet"
 
 
 def test_no_model_name():
-    if pre_trained_model_name == "resnet":
-        model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
-        model = torch.nn.Sequential(*list(model.children())[:-1])
+    try:
+        if wrong_model_name == "resnet":
+            model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
+            model = torch.nn.Sequential(*list(model.children())[:-1])
 
-    elif pre_trained_model_name == "vgg":
-        model = models.vgg16(weights=models.VGG16_Weights.IMAGENET1K_FEATURES)
-        model = torch.nn.Sequential(*list(model.children())[:-1])
-        flatten = nn.Flatten()
-        model.add_module("Flatten", flatten)
+        elif wrong_model_name == "vgg":
+            model = models.vgg16(weights=models.VGG16_Weights.IMAGENET1K_FEATURES)
+            model = torch.nn.Sequential(*list(model.children())[:-1])
+            flatten = nn.Flatten()
+            model.add_module("Flatten", flatten)
 
-    else:
-        raise NotImplementedError
-    assert 1
+        else:
+            raise RetrievalException(**RetrievalErrorCode.NotImplementedError.value)
+
+    except RetrievalException as e:
+        assert e.log == "NotImplementedError, use 'vgg' or 'resnet'."
 
 
 # # ---- test vectorize candidates ----
