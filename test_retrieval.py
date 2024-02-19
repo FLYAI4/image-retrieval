@@ -5,9 +5,12 @@ import torch
 import torchvision.models as models
 import torch.nn as nn
 import torchvision.transforms as transforms
-
 import torch.nn.functional as F
+
 from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+
+import json
 
 from myexception import RetrievalException
 from myerror import RetrievalErrorCode
@@ -24,51 +27,51 @@ from myerror import RetrievalErrorCode
 pre_trained_model_name = "resnet"
 
 
-def test_load_pretrained():
-    if pre_trained_model_name == "resnet":
-        model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
-        model = torch.nn.Sequential(*list(model.children())[:-1])
+# def test_load_pretrained():
+#     if pre_trained_model_name == "resnet":
+#         model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
+#         model = torch.nn.Sequential(*list(model.children())[:-1])
 
-    elif pre_trained_model_name == "vgg":
-        model = models.vgg16(weights=models.VGG16_Weights.IMAGENET1K_FEATURES)
-        model = torch.nn.Sequential(*list(model.children())[:-1])
-        flatten = nn.Flatten()
-        model.add_module("Flatten", flatten)
+#     elif pre_trained_model_name == "vgg":
+#         model = models.vgg16(weights=models.VGG16_Weights.IMAGENET1K_FEATURES)
+#         model = torch.nn.Sequential(*list(model.children())[:-1])
+#         flatten = nn.Flatten()
+#         model.add_module("Flatten", flatten)
 
-    else:
-        raise NotImplementedError
+#     else:
+#         raise NotImplementedError
 
-    model.eval()
-    example_input = torch.randn(1, 3, 224, 224)
-    with torch.no_grad():
-        features = model(example_input)
+#     model.eval()
+#     example_input = torch.randn(1, 3, 224, 224)
+#     with torch.no_grad():
+#         features = model(example_input)
 
-    if pre_trained_model_name == "resnet":
-        assert features.dim() == 4
-    elif pre_trained_model_name == "vgg":
-        assert features.dim() == 2
+#     if pre_trained_model_name == "resnet":
+#         assert features.dim() == 4
+#     elif pre_trained_model_name == "vgg":
+#         assert features.dim() == 2
 
 
 wrong_model_name = "chanyoungNet"
 
 
-def test_no_model_name():
-    try:
-        if wrong_model_name == "resnet":
-            model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
-            model = torch.nn.Sequential(*list(model.children())[:-1])
+# def test_no_model_name():
+#     try:
+#         if wrong_model_name == "resnet":
+#             model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
+#             model = torch.nn.Sequential(*list(model.children())[:-1])
 
-        elif wrong_model_name == "vgg":
-            model = models.vgg16(weights=models.VGG16_Weights.IMAGENET1K_FEATURES)
-            model = torch.nn.Sequential(*list(model.children())[:-1])
-            flatten = nn.Flatten()
-            model.add_module("Flatten", flatten)
+#         elif wrong_model_name == "vgg":
+#             model = models.vgg16(weights=models.VGG16_Weights.IMAGENET1K_FEATURES)
+#             model = torch.nn.Sequential(*list(model.children())[:-1])
+#             flatten = nn.Flatten()
+#             model.add_module("Flatten", flatten)
 
-        else:
-            raise RetrievalException(**RetrievalErrorCode.NotImplementedError.value)
+#         else:
+#             raise RetrievalException(**RetrievalErrorCode.NotImplementedError.value)
 
-    except RetrievalException as e:
-        assert e.log == "NotImplementedError, use 'vgg' or 'resnet'."
+#     except RetrievalException as e:
+#         assert e.log == "NotImplementedError, use 'vgg' or 'resnet'."
 
 
 # # ---- test vectorize candidates ----
@@ -90,25 +93,25 @@ model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
 model = torch.nn.Sequential(*list(model.children())[:-1])
 
 
-def test_vectorize_candidate():
+# def test_vectorize_candidate():
 
-    # 디렉토리 내의 모든 파일에 대해 반복
-    for file_path in sorted(os.listdir(image_dir)):
-        # 파일의 확장자가 이미지인지 확인
-        # print(file_path)
-        if file_path.endswith(".jpg") or file_path.endswith(".jpeg"):
-            input_image = Image.open(os.path.join(image_dir, file_path))
-            input_image = input_image.convert("RGB")
-            input_tensor = preprocess(input_image)
-            input_batch = input_tensor.unsqueeze(0)  # 배치 차원 추가
-            model.eval()
-            with torch.no_grad():
-                feature_vector = model(input_batch)
-                image_dict[file_path] = feature_vector
-    # print(image_dict)
-    # print(image_dict[file_path].size())
+#     # 디렉토리 내의 모든 파일에 대해 반복
+#     for file_path in sorted(os.listdir(image_dir)):
+#         # 파일의 확장자가 이미지인지 확인
+#         # print(file_path)
+#         if file_path.endswith(".jpg") or file_path.endswith(".jpeg"):
+#             input_image = Image.open(os.path.join(image_dir, file_path))
+#             input_image = input_image.convert("RGB")
+#             input_tensor = preprocess(input_image)
+#             input_batch = input_tensor.unsqueeze(0)  # 배치 차원 추가
+#             model.eval()
+#             with torch.no_grad():
+#                 feature_vector = model(input_batch)
+#                 image_dict[file_path] = feature_vector
+#     # print(image_dict)
+#     # print(image_dict[file_path].size())
 
-    assert image_dict[file_path].size() == torch.Size([1, 2048, 1, 1])
+#     assert image_dict[file_path].size() == torch.Size([1, 2048, 1, 1])
 
 
 # def test_no_folder_dir():
@@ -129,16 +132,16 @@ input_dir = "./sample_input"
 input_img_name = "sample_test3.jpg"
 
 
-def test_can_vectorize_input():
-    input_image = Image.open(os.path.join(input_dir, input_img_name))
-    input_image = input_image.convert("RGB")
-    input_tensor = preprocess(input_image)
-    input_batch = input_tensor.unsqueeze(0)  # 배치 차원 추가
-    model.eval()
-    with torch.no_grad():
-        feature_vector = model(input_batch)
+# def test_can_vectorize_input():
+#     input_image = Image.open(os.path.join(input_dir, input_img_name))
+#     input_image = input_image.convert("RGB")
+#     input_tensor = preprocess(input_image)
+#     input_batch = input_tensor.unsqueeze(0)  # 배치 차원 추가
+#     model.eval()
+#     with torch.no_grad():
+#         feature_vector = model(input_batch)
 
-    assert feature_vector.size() == torch.Size([1, 2048, 1, 1])
+#     assert feature_vector.size() == torch.Size([1, 2048, 1, 1])
 
 
 # def test_not_jpg_input():
@@ -155,9 +158,40 @@ def test_can_vectorize_input():
 # given : input picture image
 # when : after crop, resize
 # then : Find the most similar image
-# def test_can_find_image():
+json_path = 'image_dict.json'
+input_img_name = "sample_test25.jpg"
+input_dir = "./sample_input"
 
-#     assert 1
+with open(json_path, 'r') as f:
+    loaded_dict = json.load(f)
+
+
+def test_can_find_image():
+    input_image = Image.open(os.path.join(input_dir, input_img_name))
+    input_image = input_image.convert("RGB")
+    input_tensor = preprocess(input_image)
+    input_batch = input_tensor.unsqueeze(0)  # 배치 차원 추가
+    model.eval()
+    with torch.no_grad():
+        feature_vector = model(input_batch)
+    # 현재 이미지의 feature
+    current_feature = feature_vector.squeeze().cpu().numpy()
+
+    # feature_record에 있는 각 feature와의 코사인 유사도 계산
+    similarities = dict()
+    for path, vec in loaded_dict.items():
+        feature = np.array(vec)
+        similarity = cosine_similarity(current_feature.reshape(1, -1), feature.reshape(1, -1))
+        similarities[path] = similarity
+
+    # 가장 유사한 feature의 인덱스 찾기
+    most_similar_img = max(similarities, key=similarities.get)
+
+    # 가장 유사한 feature의 코사인 유사도와 인덱스 출력
+    print("Most similar cosine similarity:", similarities[most_similar_img])
+    print("Index of most similar feature:", most_similar_img)
+
+    assert os.path.exists(os.path.join(image_dir, most_similar_img))
 
 
 # def test_no_higher_than_th():

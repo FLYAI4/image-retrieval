@@ -30,7 +30,7 @@ for file_path in sorted(os.listdir(image_dir)):
         model.eval()
         with torch.no_grad():
             feature_vector = model(input_batch)
-            image_dict[file_path] = feature_vector.cpu().numpy().tolist()
+            image_dict[file_path] = feature_vector.squeeze().cpu().numpy().tolist()
 
 # 저장할 파일 경로
 json_path = 'image_dict.json'
