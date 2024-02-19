@@ -1,9 +1,14 @@
 import os
 from PIL import Image
+
 import torch
 import torchvision.models as models
 import torch.nn as nn
 import torchvision.transforms as transforms
+
+import torch.nn.functional as F
+from sklearn.metrics.pairwise import cosine_similarity
+
 from myexception import RetrievalException
 from myerror import RetrievalErrorCode
 # --- setup ---
@@ -81,10 +86,11 @@ preprocess = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
+model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
+model = torch.nn.Sequential(*list(model.children())[:-1])
+
 
 def test_vectorize_candidate():
-    model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
-    model = torch.nn.Sequential(*list(model.children())[:-1])
 
     # 디렉토리 내의 모든 파일에 대해 반복
     for file_path in sorted(os.listdir(image_dir)):
@@ -100,7 +106,7 @@ def test_vectorize_candidate():
                 feature_vector = model(input_batch)
                 image_dict[file_path] = feature_vector
     # print(image_dict)
-    print(image_dict[file_path].size())
+    # print(image_dict[file_path].size())
 
     assert image_dict[file_path].size() == torch.Size([1, 2048, 1, 1])
 
@@ -119,9 +125,28 @@ def test_vectorize_candidate():
 # # given : input image
 # # when : after vectorizing candidate images
 # # then : get vector of input image
-# def test_can_vectorize_input():
+input_dir = "./sample_input"
+input_dict = dict()
 
-#     assert 1
+
+def test_can_vectorize_input():
+    # 디렉토리 내의 모든 파일에 대해 반복
+    for file_path in sorted(os.listdir(input_dir)):
+        # 파일의 확장자가 이미지인지 확인
+        # print(file_path)
+        if file_path.endswith(".jpg") or file_path.endswith(".jpeg"):
+            input_image = Image.open(os.path.join(input_dir, file_path))
+            input_image = input_image.convert("RGB")
+            input_tensor = preprocess(input_image)
+            input_batch = input_tensor.unsqueeze(0)  # 배치 차원 추가
+            model.eval()
+            with torch.no_grad():
+                feature_vector = model(input_batch)
+                input_dict[file_path] = feature_vector
+    # print(image_dict)
+    print(input_dict[file_path].size())
+
+    assert input_dict[file_path].size() == torch.Size([1, 2048, 1, 1])
 
 
 # def test_not_jpg_input():
@@ -134,13 +159,29 @@ def test_vectorize_candidate():
 #     assert 1
 
 
-# # ---- test similerity ----
-# # given : input picture image
-# # when : after crop, resize
-# # then : Find the most similar image
-# def test_can_find_image():
+# ---- test similerity ----
+# given : input picture image
+# when : after crop, resize
+# then : Find the most similar image
+def test_can_find_image():
+    # 현재 이미지의 feature
+    current_feature = output.squeeze().cpu().numpy()
 
-#     assert 1
+    # feature_record에 있는 각 feature와의 코사인 유사도 계산
+    similarities = []
+    for feature in feature_record:
+        feature = feature.cpu().numpy()
+        similarity = cosine_similarity(current_feature.reshape(1, -1), feature.reshape(1, -1))
+        similarities.append(similarity)
+
+    # 가장 유사한 feature의 인덱스 찾기
+    most_similar_index = np.argmax(similarities)
+
+    # 가장 유사한 feature의 코사인 유사도와 인덱스 출력
+    print("Most similar cosine similarity:", similarities[most_similar_index])
+    print("Index of most similar feature:", most_similar_index)
+
+    assert 1
 
 
 # def test_no_higher_than_th():
