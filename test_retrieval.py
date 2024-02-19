@@ -40,9 +40,23 @@ def test_load_pretrained():
         assert features.dim() == 2
 
 
-# def test_no_model_name():
+wrong_model_name = "chanyoungNet"
 
-#     assert 1
+
+def test_no_model_name():
+    if pre_trained_model_name == "resnet":
+        model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
+        model = torch.nn.Sequential(*list(model.children())[:-1])
+
+    elif pre_trained_model_name == "vgg":
+        model = models.vgg16(weights=models.VGG16_Weights.IMAGENET1K_FEATURES)
+        model = torch.nn.Sequential(*list(model.children())[:-1])
+        flatten = nn.Flatten()
+        model.add_module("Flatten", flatten)
+
+    else:
+        raise NotImplementedError
+    assert 1
 
 
 # # ---- test vectorize candidates ----
