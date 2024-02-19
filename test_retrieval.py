@@ -27,51 +27,51 @@ from myerror import RetrievalErrorCode
 pre_trained_model_name = "resnet"
 
 
-# def test_load_pretrained():
-#     if pre_trained_model_name == "resnet":
-#         model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
-#         model = torch.nn.Sequential(*list(model.children())[:-1])
+def test_load_pretrained():
+    if pre_trained_model_name == "resnet":
+        model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
+        model = torch.nn.Sequential(*list(model.children())[:-1])
 
-#     elif pre_trained_model_name == "vgg":
-#         model = models.vgg16(weights=models.VGG16_Weights.IMAGENET1K_FEATURES)
-#         model = torch.nn.Sequential(*list(model.children())[:-1])
-#         flatten = nn.Flatten()
-#         model.add_module("Flatten", flatten)
+    elif pre_trained_model_name == "vgg":
+        model = models.vgg16(weights=models.VGG16_Weights.IMAGENET1K_FEATURES)
+        model = torch.nn.Sequential(*list(model.children())[:-1])
+        flatten = nn.Flatten()
+        model.add_module("Flatten", flatten)
 
-#     else:
-#         raise NotImplementedError
+    else:
+        raise NotImplementedError
 
-#     model.eval()
-#     example_input = torch.randn(1, 3, 224, 224)
-#     with torch.no_grad():
-#         features = model(example_input)
+    model.eval()
+    example_input = torch.randn(1, 3, 224, 224)
+    with torch.no_grad():
+        features = model(example_input)
 
-#     if pre_trained_model_name == "resnet":
-#         assert features.dim() == 4
-#     elif pre_trained_model_name == "vgg":
-#         assert features.dim() == 2
+    if pre_trained_model_name == "resnet":
+        assert features.dim() == 4
+    elif pre_trained_model_name == "vgg":
+        assert features.dim() == 2
 
 
 wrong_model_name = "chanyoungNet"
 
 
-# def test_no_model_name():
-#     try:
-#         if wrong_model_name == "resnet":
-#             model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
-#             model = torch.nn.Sequential(*list(model.children())[:-1])
+def test_no_model_name():
+    try:
+        if wrong_model_name == "resnet":
+            model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
+            model = torch.nn.Sequential(*list(model.children())[:-1])
 
-#         elif wrong_model_name == "vgg":
-#             model = models.vgg16(weights=models.VGG16_Weights.IMAGENET1K_FEATURES)
-#             model = torch.nn.Sequential(*list(model.children())[:-1])
-#             flatten = nn.Flatten()
-#             model.add_module("Flatten", flatten)
+        elif wrong_model_name == "vgg":
+            model = models.vgg16(weights=models.VGG16_Weights.IMAGENET1K_FEATURES)
+            model = torch.nn.Sequential(*list(model.children())[:-1])
+            flatten = nn.Flatten()
+            model.add_module("Flatten", flatten)
 
-#         else:
-#             raise RetrievalException(**RetrievalErrorCode.NotImplementedError.value)
+        else:
+            raise RetrievalException(**RetrievalErrorCode.NotImplementedError.value)
 
-#     except RetrievalException as e:
-#         assert e.log == "NotImplementedError, use 'vgg' or 'resnet'."
+    except RetrievalException as e:
+        assert e.log == "NotImplementedError, use 'vgg' or 'resnet'."
 
 
 # # ---- test vectorize candidates ----
@@ -132,16 +132,16 @@ input_dir = "./sample_input"
 input_img_name = "sample_test3.jpg"
 
 
-# def test_can_vectorize_input():
-#     input_image = Image.open(os.path.join(input_dir, input_img_name))
-#     input_image = input_image.convert("RGB")
-#     input_tensor = preprocess(input_image)
-#     input_batch = input_tensor.unsqueeze(0)  # 배치 차원 추가
-#     model.eval()
-#     with torch.no_grad():
-#         feature_vector = model(input_batch)
+def test_can_vectorize_input():
+    input_image = Image.open(os.path.join(input_dir, input_img_name))
+    input_image = input_image.convert("RGB")
+    input_tensor = preprocess(input_image)
+    input_batch = input_tensor.unsqueeze(0)  # 배치 차원 추가
+    model.eval()
+    with torch.no_grad():
+        feature_vector = model(input_batch)
 
-#     assert feature_vector.size() == torch.Size([1, 2048, 1, 1])
+    assert feature_vector.size() == torch.Size([1, 2048, 1, 1])
 
 
 # def test_not_jpg_input():
