@@ -1,7 +1,7 @@
 import image_retrieval
 from myexception import RetrievalException
+import os
 # from myerror import RetrievalErrorCode
-import torch
 
 
 # -----사전 학습 모델 로딩 테스트 ----
@@ -34,10 +34,15 @@ input_dir = "./sample_input"
 input_img_name = "sample_test3.jpg"
 
 
-# TODO : input image name 이 없을 때 처리
+# File not found check path
+wrong_image_path = "chanyoung.jpg"
+
+
 def test_wrong_input_to_vectorize():
-    image_retrieval.vectorize_image(input_path=input_img_name)
-    assert 1
+    try:
+        image_retrieval.vectorize_image(input_path=wrong_image_path)
+    except RetrievalException as e:
+        assert e.log == "File not found check path"
 
 
 # ---- test similerity ----
@@ -45,14 +50,19 @@ def test_wrong_input_to_vectorize():
 # when : after crop, resize
 # then : Find the most similar image
 json_path = 'image_dict.json'
-input_img_name = "sample_test25.jpg"
+input_img_name = "sample6_2.jpg"
 input_dir = "./sample_input"
+db_dir = "./sample_image"
 
 
-# TODO : 한 사이클 테스트 코드 작성
 def test_can_find_image():
-
-    assert 1
+    # load model
+    model = image_retrieval.load_pretrained_model(model_name="resnet")
+    feature = image_retrieval.vectorize_image(input_path=input_img_name,
+                                              model=model)
+    most_similar = image_retrieval.compute_similarity(feature_vector=feature,
+                                                      json_path=json_path)
+    assert os.path.exists(os.path.join(db_dir, most_similar))
 
 # TODO : th 홀드 값 작성
 # def test_no_higher_than_th():

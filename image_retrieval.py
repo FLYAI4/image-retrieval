@@ -42,7 +42,7 @@ def load_vectorized_db_images(json_path=None):
     return vectorized_db_dict
 
 
-user_folder_path = "sample_input"
+user_folder_path = "./sample_input"
 
 
 def preprocessing_image(image):
@@ -60,17 +60,18 @@ def preprocessing_image(image):
     return input_batch
 
 
-# TODO : input image name 이 없을 때 처리
 def vectorize_image(input_path=None, model=None):
-    input_image = Image.open(os.path.join(user_folder_path, input_path))
-    input_batch = preprocessing_image(input_image)
-    model.eval()
-    with torch.no_grad():
-        feature_vector = model(input_batch)
-    return feature_vector.squeeze()
+    if os.path.exists(os.path.join(user_folder_path, input_path)):
+        input_image = Image.open(os.path.join(user_folder_path, input_path))
+        input_batch = preprocessing_image(input_image)
+        model.eval()
+        with torch.no_grad():
+            feature_vector = model(input_batch)
+        return feature_vector.squeeze()
+    else:
+        raise RetrievalException(**RetrievalErrorCode.FileNotFoundError.value)
 
 
-# TODO : JSON Path 를 매개변수로 받는게 아니라 DB dict를 받아야함
 def compute_similarity(feature_vector=None, json_path=None):
     db_dict = load_vectorized_db_images(json_path)
     input_feature = feature_vector.cpu().numpy()
