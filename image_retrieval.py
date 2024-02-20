@@ -69,7 +69,7 @@ def vectorize_image(input_path=None, model=None):
             feature_vector = model(input_batch)
         return feature_vector.squeeze()
     else:
-        raise RetrievalException(**RetrievalErrorCode.FileNotFoundError.value)
+        raise RetrievalException(**RetrievalErrorCode.ImageNotFoundError.value)
 
 
 def compute_similarity(feature_vector=None, json_path=None):
@@ -85,5 +85,12 @@ def compute_similarity(feature_vector=None, json_path=None):
 
     # 가장 유사한 feature의 인덱스 찾기
     most_similar_img = max(similarities, key=similarities.get)
+    # max 값을 받아서 th 이하이면 raise Exception
+    similarity_level = max(similarities.values())
+    threshold = 0.65
+    print(f'Most similar img {most_similar_img} with Confidence Level {similarity_level}')
 
-    return most_similar_img
+    if similarity_level < threshold:
+        raise RetrievalException(**RetrievalErrorCode.LowConfidenceError.value)
+    else:
+        return most_similar_img

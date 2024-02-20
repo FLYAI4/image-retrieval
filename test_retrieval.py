@@ -64,7 +64,17 @@ def test_can_find_image():
                                                       json_path=json_path)
     assert os.path.exists(os.path.join(db_dir, most_similar))
 
-# TODO : th 홀드 값 작성
-# def test_no_higher_than_th():
 
-#     assert 1
+mock_image_path = "random_image.jpg"
+
+
+def test_no_higher_than_th():
+    # load model
+    model = image_retrieval.load_pretrained_model(model_name="resnet")
+    feature = image_retrieval.vectorize_image(input_path=mock_image_path,
+                                              model=model)
+    try:
+        image_retrieval.compute_similarity(feature_vector=feature,
+                                           json_path=json_path)
+    except RetrievalException as e:
+        assert e.log == "Low Confidence level of similarity"
