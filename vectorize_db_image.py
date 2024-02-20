@@ -1,3 +1,11 @@
+'''
+DB에 있는 원본 이미지들에 대해서 Vectorize 한 다음 JSON 형식으로 저장하는 코드
+원본 이미지가 저장된 folder path를 line 15 에서 변경한 다음 코드 실행
+
+실행하면 image_dict.json 파일 저장
+
+'''
+
 import os
 from PIL import Image
 import torch
@@ -5,6 +13,10 @@ import torchvision.models as models
 import torch.nn as nn
 import torchvision.transforms as transforms
 import json
+
+
+image_dir = "./sample_image"
+
 
 preprocess = transforms.Compose([
     transforms.Resize((512, 512)),
@@ -15,7 +27,6 @@ preprocess = transforms.Compose([
 model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
 model = nn.Sequential(*list(model.children())[:-1])
 
-image_dir = "./sample_image"
 image_dict = dict()
 
 # 디렉토리 내의 모든 파일에 대해 반복
