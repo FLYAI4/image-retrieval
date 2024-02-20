@@ -1,0 +1,6 @@
+__pycache__
+.pytest_cache
+sample_image
+sample_input
+resnet50_model.pth
+vgg16_model.pth
