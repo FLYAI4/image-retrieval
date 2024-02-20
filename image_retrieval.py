@@ -37,7 +37,7 @@ def load_vectorized_db_images(json_path=None):
         with open(json_path, 'r') as f:
             vectorized_db_dict = json.load(f)
     except Exception as e:
-        raise RetrievalException(**RetrievalErrorCode.WrongJsonError.value, 
+        raise RetrievalException(**RetrievalErrorCode.WrongJsonError.value,
                                  error=e)
     return vectorized_db_dict
 
