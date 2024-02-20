@@ -1,5 +1,5 @@
-from ImageRetrieval import RetrievalManager
-from myexception import RetrievalException
+from src.ImageRetrieval import RetrievalManager
+from src.myexception import RetrievalException
 import os
 # from myerror import RetrievalErrorCode
 
@@ -51,7 +51,7 @@ def test_wrong_input_to_vectorize():
 # given : input picture image
 # when : after crop, resize
 # then : Find the most similar image
-json_path = 'image_dict.json'
+json_path = './models/image_dict.json'
 input_img_name = "sample6_2.jpg"
 input_dir = "./sample_input"
 db_dir = "./sample_image"

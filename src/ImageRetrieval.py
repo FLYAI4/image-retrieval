@@ -2,16 +2,14 @@ import os
 from PIL import Image
 
 import torch
-import torchvision.models as models
-import torch.nn as nn
 import torchvision.transforms as transforms
 
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import json
 
-from myexception import RetrievalException
-from myerror import RetrievalErrorCode
+from src.myexception import RetrievalException
+from src.myerror import RetrievalErrorCode
 
 
 class RetrievalManager:
@@ -30,14 +28,10 @@ class RetrievalManager:
         """
 
         if model_name == "resnet":
-            model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
-            model = torch.nn.Sequential(*list(model.children())[:-1])
+            model = torch.load("./models/resnet50_model.pth")
 
         elif model_name == "vgg":
-            model = models.vgg16(weights=models.VGG16_Weights.IMAGENET1K_FEATURES)
-            model = torch.nn.Sequential(*list(model.children())[:-1])
-            flatten = nn.Flatten()
-            model.add_module("Flatten", flatten)
+            model = torch.load("./models/vgg16_model.pth")
 
         else:
             raise RetrievalException(**RetrievalErrorCode.WrongModelError.value)
